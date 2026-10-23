@@ -95,4 +95,5 @@ unabhängigen Installationsort angepasst. Die dort vorhandene GPLv3-Lizenzdatei 
 unverändert bei [local-doc-search](skills/local-doc-search/LICENSE) und
 [local-doc-sync](skills/local-doc-sync/LICENSE) enthalten. Weitere lokale Skills
 wurden als Ausgangspunkt übernommen und die Zammad-Anweisungen neutralisiert.
-Diese Bibliothek legt keine neue pauschale Lizenz für alle Skills fest.
+Die gesamte Bibliothek steht unter der GNU General Public License Version 3
+(GPLv3). Den vollständigen Lizenztext enthält [LICENSE](LICENSE).
