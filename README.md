@@ -9,6 +9,7 @@ Skill. Installation und Updates erfolgen über das Git-Repository.
 | `chat-benennung` | Aktuellen Codex-Chat nach Tätigkeit und gegebenenfalls Ticketnummer benennen | Codex mit verfügbarer Funktion zur Chat-Benennung |
 | `local-doc-search` | Lokalen Dokumentenindex durchsuchen und Originalpfade sowie Seiten/Zeilen zitieren | Eingerichtetes `local-docs`-Projekt |
 | `local-doc-sync` | Dokumentenindex auf ausdrücklichen Wunsch aktualisieren | Eingerichtetes `local-docs`-Projekt |
+| `zammad-api` | Ticket und Verlauf über die REST-API lesen | Go oder kompiliertes Programm, `ZAMMAD_URL` und `ZAMMAD_API_TOKEN` |
 | `zammad-antwort` | Kundenantwort als Entwurf zum manuellen Kopieren erstellen | Tickettext oder lesender Zammad-Zugriff |
 | `zammad-jira-check` | Passende Jira-Tickets zu einem Problem finden | Jira-Suchzugriff, bei Ticketbezug auch Zammad-Kontext |
 | `zammad-notiz` | Interne Zammad-Notiz entwerfen oder ausdrücklich beauftragt eintragen | Ticketkontext; zum Eintragen verlässlicher interner Schreibzugriff |
@@ -73,6 +74,16 @@ Es ist keine Instanzadresse fest hinterlegt. Ticketlinks, Auftrag und verfügbar
 Anbindungen bestimmen den Kontext. Bei fehlender Anmeldung oder mehrdeutiger
 Instanz wird gezielt nachgefragt. Für Entwürfe kann auch bereitgestellter Tickettext
 genügen; eine tatsächliche Jira-Suche benötigt eine verfügbare Jira-Anbindung.
+
+`zammad-api` liest ein Ticket und seine Artikel über die REST-API. Hinterlege
+`ZAMMAD_URL` als HTTPS-Startadresse ohne `/api/v1` und `ZAMMAD_API_TOKEN` lokal
+als Umgebungsvariablen; starte Codex bzw. Claude Code danach vollständig neu.
+Der Token gehört nicht in Skilldateien, Chat oder Repository. Das Go-Programm
+verwendet ausschließlich die Standardbibliothek. Es kann mit `go run` ausgeführt
+oder außerhalb des Repositories als eigenständige Binärdatei kompiliert werden.
+Die kompilierte Datei benötigt zur Laufzeit kein Go. Das Programm erwartet die interne
+Ticket-ID aus dem Ticketlink, nicht die angezeigte Ticketnummer. Es bietet
+ausschließlich lesenden Zugriff; Anhänge werden nicht heruntergeladen.
 
 `zammad-antwort` liefert ausschließlich einen Entwurf. `zammad-notiz` liefert
 standardmäßig ebenfalls einen Entwurf; nur ein ausdrücklicher Auftrag erlaubt das
