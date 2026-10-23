@@ -13,8 +13,11 @@ Finde vorhandene Jira-Tickets zum beschriebenen Problem und zeige dem Benutzer n
 
 ## Problem und Suchraum erfassen
 
+- Nutze für den Zammad-Ticketverlauf bevorzugt den verfügbaren Skill [zammad-api](../zammad-api/SKILL.md). Eine Ticketnummer wird mit `--number` über die API aufgelöst; bei einem Ticketlink nutze die verifizierte interne ID nach Prüfung der Instanz. Fordere keinen Link an, wenn die Nummer eindeutig aufgelöst werden kann. Die Jira-Suche erfolgt weiterhin über Jira-Werkzeuge, nicht über das Zammad-API-Programm.
+- Anhänge und separate Zammad-Ticketverknüpfungen fehlen im API-Ergebnis und müssen bei Bedarf zusätzlich lesend geprüft werden. Ohne eingerichteten API-Zugriff nutze einen geeigneten lesenden Browserzugriff oder bereitgestellten Tickettext. Der API-Skill kann keine interne Notiz schreiben; die Zustimmung zur Notiz wird weiterhin über `zammad-notiz` umgesetzt oder bei fehlendem Schreibzugriff nur als Entwurf erfüllt.
+
 - Verwende die Problembeschreibung und, wenn angegeben, den relevanten Zammad-Ticketverlauf. Erfasse betroffene Funktion, tatsächliches und erwartetes Verhalten, Fehlermeldungen sowie bekannte Versionen und Reproduktionsbedingungen. Frage nur nach Angaben, die für eine sinnvolle Suche fehlen.
-- Eine Problembeschreibung genügt für die Jira-Suche; ein Zammad-Ticketlink ist erst für das Anlegen einer konkreten Notiz erforderlich. Bei fehlendem Zugriff bitte um Anmeldung oder den relevanten Inhalt, ohne eine erfolgte Prüfung vorzutäuschen.
+- Eine Problembeschreibung genügt für die Jira-Suche; für eine konkrete Notiz muss das Zammad-Zielticket eindeutig feststehen, etwa über die per API aufgelöste Nummer oder einen Ticketlink. Bei fehlendem Zugriff bitte um Anmeldung oder den relevanten Inhalt, ohne eine erfolgte Prüfung vorzutäuschen.
 - Nutze vorhandene Jira-Verweise aus dem Zammad-Ticket als Ausgangspunkt und prüfe deren Inhalt. Eine bestehende Verknüpfung beweist für sich allein noch keine inhaltliche Übereinstimmung.
 - Verwende verfügbare Jira-Such- und Lesewerkzeuge. Nutze einen bekannten Projektkontext; wenn dieser fehlt, ermittle den relevanten Suchraum aus den zugänglichen Projekten oder frage bei Mehrdeutigkeit nach. Erfinde weder Jira-Instanz noch Projektschlüssel. Öffentliche Websuche ist kein Ersatz für die Suche im internen Jira.
 

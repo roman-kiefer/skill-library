@@ -99,11 +99,50 @@ func readTicket(client *http.Client, cfg config, id string) (result, error) {
 	return data, nil
 }
 
+// resolveNumber checks all returned pages and accepts only an exact, unique match.
+func resolveNumber(client *http.Client, cfg config, number string) (string, error) {
+	ids := make(map[string]bool)
+	for page := 1; page <= 100; page++ {
+		var tickets []struct {
+			ID     json.Number `json:"id"`
+			Number string      `json:"number"`
+		}
+		path := "tickets/search?query=" + url.QueryEscape("number:"+number) + "&per_page=100&page=" + strconv.Itoa(page)
+		if err := get(client, cfg, path, &tickets); err != nil {
+			return "", err
+		}
+		if tickets == nil {
+			return "", errors.New("Zammad hat keine gültige Suchergebnisliste geliefert.")
+		}
+		for _, ticket := range tickets {
+			if ticket.Number != number {
+				continue
+			}
+			id, err := strconv.ParseUint(string(ticket.ID), 10, 64)
+			if err != nil || id == 0 {
+				return "", errors.New("Zammad hat eine ungültige interne Ticket-ID geliefert.")
+			}
+			ids[strconv.FormatUint(id, 10)] = true
+		}
+		if len(ids) > 1 {
+			return "", errors.New("Mehrere Tickets mit exakt dieser Ticketnummer gefunden; Ticketlink zur Klärung verwenden.")
+		}
+		if len(tickets) < 100 {
+			for id := range ids {
+				return id, nil
+			}
+			return "", errors.New("Kein zugängliches Ticket mit exakt dieser Ticketnummer gefunden.")
+		}
+	}
+	return "", errors.New("Suchgrenze erreicht; Zuordnung unvollständig. Ticketlink verwenden.")
+}
+
 func run(args []string, lookup func(string) string, stdout, stderr io.Writer) int {
 	flags := flag.NewFlagSet("zammad-api", flag.ContinueOnError)
 	flags.SetOutput(stderr)
+	ticketNumber := flags.String("number", "", "Angezeigte Ticketnummer statt interner ID")
 	flags.Usage = func() {
-		fmt.Fprintln(stderr, "Aufruf: zammad-api TICKET_ID\nLiest Ticket und Artikel. Erwartet die interne ID, nicht die Ticketnummer.\nUmgebung: ZAMMAD_URL und ZAMMAD_API_TOKEN.")
+		fmt.Fprintln(stderr, "Aufruf: zammad-api TICKET_ID | zammad-api --number TICKETNUMMER\nLiest Ticket und Artikel; --number ermittelt zuerst die interne ID.\nUmgebung: ZAMMAD_URL und ZAMMAD_API_TOKEN.")
 	}
 	if err := flags.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
@@ -111,15 +150,19 @@ func run(args []string, lookup func(string) string, stdout, stderr io.Writer) in
 		}
 		return 2
 	}
-	if flags.NArg() != 1 {
+	byNumber := *ticketNumber != ""
+	if (!byNumber && flags.NArg() != 1) || (byNumber && flags.NArg() != 0) {
 		flags.Usage()
 		return 2
 	}
 	id := flags.Arg(0)
+	if byNumber {
+		id = *ticketNumber
+	}
 	valid := id != "" && strings.IndexFunc(id, func(r rune) bool { return r < '0' || r > '9' }) == -1
 	number, err := strconv.ParseUint(id, 10, 64)
 	if !valid || err != nil || number == 0 {
-		fmt.Fprintln(stderr, "Die interne Ticket-ID muss eine positive Ganzzahl sein.")
+		fmt.Fprintln(stderr, "Ticket-ID beziehungsweise Ticketnummer muss eine positive Ganzzahl sein.")
 		return 2
 	}
 	cfg, err := configuration(lookup)
@@ -128,10 +171,26 @@ func run(args []string, lookup func(string) string, stdout, stderr io.Writer) in
 		return 1
 	}
 	client := &http.Client{Timeout: 30 * time.Second, CheckRedirect: noRedirects}
-	data, err := readTicket(client, cfg, strconv.FormatUint(number, 10))
+	if byNumber {
+		id, err = resolveNumber(client, cfg, *ticketNumber)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+	} else {
+		id = strconv.FormatUint(number, 10)
+	}
+	data, err := readTicket(client, cfg, id)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
+	}
+	if byNumber {
+		var actual string
+		if json.Unmarshal(data.Ticket["number"], &actual) != nil || actual != *ticketNumber {
+			fmt.Fprintln(stderr, "Gelesenes Ticket stimmt nicht mit der angeforderten Ticketnummer überein.")
+			return 1
+		}
 	}
 	encoder := json.NewEncoder(stdout)
 	encoder.SetIndent("", "  ")

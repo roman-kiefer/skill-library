@@ -81,8 +81,11 @@ als Umgebungsvariablen; starte Codex bzw. Claude Code danach vollständig neu.
 Der Token gehört nicht in Skilldateien, Chat oder Repository. Das Go-Programm
 verwendet ausschließlich die Standardbibliothek. Es kann mit `go run` ausgeführt
 oder außerhalb des Repositories als eigenständige Binärdatei kompiliert werden.
-Die kompilierte Datei benötigt zur Laufzeit kein Go. Das Programm erwartet die interne
-Ticket-ID aus dem Ticketlink, nicht die angezeigte Ticketnummer. Es bietet
+Die kompilierte Datei benötigt zur Laufzeit kein Go. Das Programm akzeptiert die interne
+Ticket-ID aus dem Ticketlink oder ermittelt mit `--number 663140` die interne ID über
+eine paginierte API-Suche nach der angezeigten Ticketnummer. Nur exakte und eindeutige
+Treffer werden verwendet. Die anderen Zammad-Skills nutzen diesen Zugriff bevorzugt,
+sofern der API-Skill verfügbar und eingerichtet ist. Das Programm bietet
 ausschließlich lesenden Zugriff; Anhänge werden nicht heruntergeladen.
 
 `zammad-antwort` liefert ausschließlich einen Entwurf. `zammad-notiz` liefert

@@ -13,6 +13,8 @@ Erstelle eine fachlich belastbare, direkt kopierbare Antwort für das angegebene
 
 ## Ticketkontext erfassen
 
+- Nutze zum Lesen bevorzugt den verfügbaren Skill [zammad-api](../zammad-api/SKILL.md). Bei einer Ticketnummer verwende dessen `--number`-Aufruf; ein Ticketlink ist dann nicht erforderlich. Bei einem Ticketlink nutze die verifizierte interne ID und prüfe die Instanz. Eine Ticketnummer ist keine interne ID. Fehlt der API-Skill oder ist der Zugriff nicht eingerichtet, verwende einen geeigneten lesenden Browserzugriff oder bereitgestellten Tickettext. Anhänge werden vom API-Programm nicht heruntergeladen.
+
 - Verwende bereitgestellte Kundennachrichten, den Ticketverlauf und die fachlichen Stichpunkte des Benutzers. Wenn ein Ticketlink oder eine Ticketnummer genannt wird, lies das betreffende Ticket über verfügbare Browserwerkzeuge oder einen geeigneten lesenden Zugriff. Erfinde keine Ticket-URL, wenn das konkrete URL-Schema nicht bekannt ist.
 - Öffne nur die für den Auftrag relevanten Tickets und Anhänge. Berücksichtige die neueste Kundenfrage sowie frühere Antworten, bereits versuchte Schritte und Zusagen. Unterscheide Kundennachrichten, öffentliche Antworten und interne Notizen.
 - Wenn der Zugriff eine Anmeldung erfordert oder nicht verfügbar ist, bitte um Anmeldung oder den relevanten Tickettext. Frage gezielt nach dem fehlenden Inhalt; eine Zammad-Startadresse allein identifiziert kein Ticket.

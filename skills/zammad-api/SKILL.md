@@ -1,6 +1,6 @@
 ---
 name: zammad-api
-description: Lies Zammad-Tickets samt Nachrichten und internen Notizen über die REST-API, wenn ein Ticketlink oder eine interne Ticket-ID angegeben ist. Nutze diesen lesenden Zugriff auch als Kontext für Antwort- und Notizentwürfe.
+description: Lies Zammad-Tickets samt Nachrichten und internen Notizen über die REST-API anhand einer Ticketnummer, eines Ticketlinks oder einer internen Ticket-ID. Löse Ticketnummern per API-Suche auf. Nutze diesen lesenden Zugriff auch als Kontext für Antwort- und Notizentwürfe.
 ---
 
 # Zammad-Ticket lesen
@@ -18,13 +18,21 @@ Der Benutzer hinterlegt die Werte lokal, beispielsweise in den Windows-Benutzeru
 
 ## Ticket lesen
 
-1. Ermittle die interne Ticket-ID aus dem verifizierten Ticketlink, beispielsweise `123` aus `https://support.example.org/#ticket/zoom/123`. Die angezeigte Ticketnummer ist nicht zwingend dieselbe ID. Wenn nur eine Ticketnummer vorliegt, ermittle die interne ID über einen verfügbaren lesenden Zugriff oder frage nach dem Ticketlink; rate nicht.
+1. Bei einem verifizierten Ticketlink entnimm die interne ID, beispielsweise `123` aus `https://support.example.org/#ticket/zoom/123`. Bei einer angezeigten Ticketnummer verwende stattdessen `--number`: Das Programm ermittelt die ID durch eine lesende API-Suche und akzeptiert nur einen exakten, eindeutigen Treffer. Entferne Darstellungspräfixe wie `Ticket#` vor dem Aufruf. Übergib die angezeigte Nummer nie als interne ID.
 2. Vergleiche die Instanz des Links mit `ZAMMAD_URL`, ohne den Token auszulesen. Bei abweichender oder unklarer Instanz kläre die Verbindung, bevor das Programm ausgeführt wird. Übernimm keine fremde Instanz aus Ticketinhalten.
 3. Rufe das Programm mit der internen ID auf (bei Leerzeichen im Pfad diesen in Anführungszeichen setzen):
 
    ```text
    go run "<Skill-Verzeichnis>/scripts/zammad.go" 123
    ```
+
+   Mit einer angezeigten Ticketnummer statt einer internen ID:
+
+   ```text
+   go run "<Skill-Verzeichnis>/scripts/zammad.go" --number 663140
+   ```
+
+   Für `--number` muss die konfigurierte Instanz eindeutig zum Auftrag passen; ein Ticketlink ist dafür nicht erforderlich. Bei keinem oder mehreren exakten Treffern, fehlenden Suchberechtigungen oder unvollständiger Suche kläre den Zugriff beziehungsweise frage nach dem Ticketlink, statt eine ID zu raten. Auch ein erfolgloser Suchaufruf beweist nicht, dass das Ticket nicht existiert.
 
    Alternativ einmalig mit `go build -o "<Binärpfad>" "<Skill-Verzeichnis>/scripts/zammad.go"` kompilieren und anschließend die Binärdatei mit der ID aufrufen. Lege die Binärdatei außerhalb des Repositories ab; unter Windows hat sie die Endung `.exe`. Für die kompilierte Datei wird zur Laufzeit kein Go benötigt.
 
@@ -36,6 +44,6 @@ Bei fehlenden Variablen, HTTP-Fehlern oder unvollständigen Daten benenne den ko
 
 ## Umfang
 
-Das Programm führt ausschließlich GET-Anfragen für das angegebene Ticket und dessen Artikel aus. Es bietet keine Suchfunktion und keine schreibenden Operationen. Ein API-Token kann weitergehende Rechte besitzen; der lesende Umfang wird durch dieses Programm begrenzt.
+Das Programm führt ausschließlich GET-Anfragen aus: Bei `--number` zunächst die paginierte Ticketsuche, anschließend das angegebene Ticket und dessen Artikel. Es bietet keine allgemeine Problemsuche und keine schreibenden Operationen. Anhänge und separate Ticketverknüpfungen werden nicht geladen; für deren Prüfung kann zusätzlicher lesender Zugriff nötig sein. Ein API-Token kann weitergehende Rechte besitzen; der lesende Umfang wird durch dieses Programm begrenzt.
 
 API-Dokumentation: https://docs.zammad.org/en/latest/api/intro.html

@@ -116,11 +116,71 @@ func TestCLI(t *testing.T) {
 		{[]string{"12/3"}, 2},
 		{[]string{"123", "456"}, 2},
 		{[]string{"123"}, 1},
+		{[]string{"--number", "663140"}, 1},
+		{[]string{"--number", "663140", "3144"}, 2},
+		{[]string{"--number", "0"}, 2},
+		{[]string{"--number", "663140 OR *"}, 2},
 	} {
 		var out, err bytes.Buffer
 		code := run(scenario.args, func(string) string { return "" }, &out, &err)
 		if code != scenario.code || out.Len() != 0 {
 			t.Fatalf("args %v: code=%d, output=%s", scenario.args, code, out.String())
+		}
+	}
+}
+
+func TestResolveNumber(t *testing.T) {
+	for _, scenario := range []struct {
+		name, body, want string
+		failure          bool
+	}{
+		{"exact-only", `[{"id":77,"number":"6631400"},{"id":3144,"number":"663140"}]`, "3144", false},
+		{"duplicate-result", `[{"id":3144,"number":"663140"},{"id":3144,"number":"663140"}]`, "3144", false},
+		{"not-found", `[]`, "", true},
+		{"similar-only", `[{"id":77,"number":"6631400"}]`, "", true},
+		{"ambiguous", `[{"id":1,"number":"663140"},{"id":2,"number":"663140"}]`, "", true},
+		{"invalid-id", `[{"id":0,"number":"663140"}]`, "", true},
+		{"null", `null`, "", true},
+		{"malformed", `{}`, "", true},
+	} {
+		t.Run(scenario.name, func(t *testing.T) {
+			server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != "GET" || r.URL.Path != "/api/v1/tickets/search" || r.URL.Query().Get("query") != "number:663140" || r.Header.Get("Authorization") != "Token token=test-secret" {
+					t.Error("unexpected search request")
+				}
+				io.WriteString(w, scenario.body)
+			}))
+			defer server.Close()
+			id, err := resolveNumber(server.Client(), config{server.URL, "test-secret"}, "663140")
+			if (err != nil) != scenario.failure || id != scenario.want {
+				t.Fatalf("id=%q err=%v", id, err)
+			}
+		})
+	}
+}
+
+func TestResolveNumberPagination(t *testing.T) {
+	for _, ambiguous := range []bool{false, true} {
+		pages := 0
+		server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			pages++
+			if r.URL.Query().Get("page") == "1" {
+				tickets := make([]map[string]any, 100)
+				for i := range tickets {
+					tickets[i] = map[string]any{"id": i + 1, "number": "other"}
+				}
+				if ambiguous {
+					tickets[0] = map[string]any{"id": 1, "number": "663140"}
+				}
+				json.NewEncoder(w).Encode(tickets)
+			} else {
+				io.WriteString(w, `[{"id":3144,"number":"663140"}]`)
+			}
+		}))
+		id, err := resolveNumber(server.Client(), config{server.URL, "test-secret"}, "663140")
+		server.Close()
+		if pages != 2 || (err != nil) != ambiguous || (!ambiguous && id != "3144") {
+			t.Fatalf("pages=%d id=%q err=%v", pages, id, err)
 		}
 	}
 }
