@@ -1,0 +1,3 @@
+interface:
+  display_name: "Zammad-Notiz"
+  short_description: "Interne Zammad-Notizen mit geprüftem Jira-Verweis"

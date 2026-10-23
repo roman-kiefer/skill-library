@@ -1,0 +1,3 @@
+interface:
+  display_name: "Zammad-Jira-Check"
+  short_description: "Passende Jira-Tickets zu Zammad-Problemen finden"

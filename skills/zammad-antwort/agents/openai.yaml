@@ -1,0 +1,3 @@
+interface:
+  display_name: "Zammad-Antwort"
+  short_description: "Kundenantworten für Zammad zum manuellen Kopieren"
