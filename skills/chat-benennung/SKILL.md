@@ -1,6 +1,6 @@
 ---
 name: chat-benennung
-description: Benenne den aktuellen Codex-Chat anhand einer vorhandenen Jira- oder Zammad-Ticketnummer und der konkreten Tätigkeit.
+description: Benenne den aktuellen Codex-Chat anhand einer vorhandenen Jira-Ticketnummer, GitHub-Issuenummer oder Zammad-Ticketnummer und der konkreten Tätigkeit.
 ---
 
 # Codex-Chat benennen
@@ -10,9 +10,10 @@ Dieser Skill ist Codex-spezifisch. Verwende eine verfügbare Funktion zum Umbene
 Benenne den aktuellen Codex-Chat, sobald sein Thema erkennbar ist. Verwende einen kurzen deutschen Titel mit einem Nomen für den Gegenstand und einem Verb im Infinitiv für die Tätigkeit.
 
 - Ist eine zugehörige Jira-Ticketnummer bekannt, verwende `[<JiraTicketNr>] <Nomen> <Verb>`.
+- Andernfalls, falls eine zugehörige GitHub-Issuenummer bekannt ist, verwende `[#<GitHubIssueNr>] <Nomen> <Verb>`.
 - Andernfalls, falls eine zugehörige Zammad-Ticketnummer bekannt ist, verwende `[<ZammadTicketNr>] <Nomen> <Verb>`.
 - Ist keine Ticketnummer bekannt, verwende `<Nomen> <Verb>`.
 
-Bevorzuge bei einem Chat mit beiden Nummern die Jira-Ticketnummer. Erfinde keine Nummer. Wenn später eine passende Ticketnummer oder ein genaueres Thema bekannt wird, aktualisiere den Titel. Benenne nur den aktuellen Chat; ändere bestehende andere Chats nur auf ausdrücklichen Wunsch.
+Verwende nur bekannte, zum Thema gehörende Nummern. Bei mehreren zugehörigen Nummern gilt die Priorität Jira → GitHub → Zammad. Erfinde keine Nummer. Wenn später eine passende Jira-Ticketnummer, GitHub-Issuenummer, Zammad-Ticketnummer oder ein genaueres Thema bekannt wird, aktualisiere den Titel gemäß dieser Priorität. Benenne nur den aktuellen Chat; ändere bestehende andere Chats nur auf ausdrücklichen Wunsch.
 
-Beispiele: `[ABC-1234] Mitarbeiterjournal öffnen`, `[661234] Mitarbeiterjournal öffnen`.
+Beispiele: `[ABC-1234] Mitarbeiterjournal öffnen`, `[#123] Anmeldung reparieren`, `[661234] Mitarbeiterjournal öffnen`.
